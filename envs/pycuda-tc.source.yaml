@@ -1,0 +1,13 @@
+name: pycuda-tc
+channels:
+  - conda-forge
+  - nvidia
+dependencies:
+  - gcc
+  - pip
+  - python
+  - cuda<=12.9
+  - pip:
+    - phylox
+    - pycuda
+    - numpy
