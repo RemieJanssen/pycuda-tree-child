@@ -5,12 +5,17 @@ import networkx as nx
 import datetime
 import os
 
-from phylox.generators.lgt import generate_network_lgt
+# from phylox.generators.lgt import generate_network_lgt
+from phylox.generators.trees.beta_splitting_tree import simulate_beta_splitting
+from phylox.generators.trees.add_edges import network_from_tree, AddEdgeMethod
+
 from phylox.classes.dinetwork import is_tree_child
 from phylox.constants import LABEL_ATTR
 from phylox.dinetwork import DiNetwork
 
 from pycuda.compiler import SourceModule
+
+MAX_NUMBER_OF_THREADS_PER_BLOCK = 1024
 
 with open("tree_child.cu") as f:
     tree_child_source_code = f.read()
@@ -31,15 +36,16 @@ def network_to_adjacency_list(network, max_degree=2):
     return node_list
 
 def label_leaves(network):
+    for node in network.nodes:
+        if LABEL_ATTR in network.nodes[node]:
+           del network.nodes[node][LABEL_ATTR]
     for i, l in enumerate(network.leaves):
-        network.nodes[l][LABEL_ATTR] = i
+        network.nodes[l][LABEL_ATTR] = str(i)
 
 
 def gpu_is_tree_child(nodes_adjacency_list, max_number_of_neighbours, number_of_nodes):
     result = numpy.zeros(1, dtype=numpy.int32)
     max_number_of_neighbours = numpy.int32(max_number_of_neighbours)
-
-    MAX_NUMBER_OF_THREADS_PER_BLOCK = 512
     blocks = int(number_of_nodes / MAX_NUMBER_OF_THREADS_PER_BLOCK) + 1
     threads_per_block = min(MAX_NUMBER_OF_THREADS_PER_BLOCK, number_of_nodes)
     device_is_tree_child(
@@ -53,24 +59,29 @@ def generate_networks(networks_folder, n, max_k, step, iterations):
         for i in range(iterations):
             print(f"generating network with {n} leaves and {k} reticulations")
             start_generating = datetime.datetime.now()
-            network = generate_network_lgt(n,k,0.5,0.5)
+            # network = generate_network_lgt(n,k,0.5,0.5)
+            tree = simulate_beta_splitting(n, 1)
+            network = network_from_tree(tree, k, AddEdgeMethod.UNIFORM)
+
             label_leaves(network)
-            print(network)
+            # print(network)
             end_generating = datetime.datetime.now()
             print(f"generating took {end_generating - start_generating}")
             with open(os.path.join(networks_folder, f"{n}_{k}_{i}"), "w") as f:
-                f.write(network.newick())
+                f.write(network.newick(simple=True))
+            del network
+
 
 if __name__ == "__main__":
-    n = 3
-    max_k = 3
-    step = 1
-    iterations = 2
+    n = 30000
+    max_k = 30000
+    step = 1000
+    iterations = 10
     output_folder = "./output/"
-    networks_folder = os.path.join(output_folder, "networks")
+    networks_folder = os.path.join(output_folder, "networks_big")
     output_file = os.path.join(output_folder, "results.csv")
     os.makedirs(networks_folder, exist_ok=True)
-    # generate_networks(networks_folder, n, max_k, step, iterations)
+    generate_networks(networks_folder, n, max_k, step, iterations)
 
     with open(output_file, "w+") as f:
         f.write(f"n,k,i,gpu_tc,cpu_tc,gpu_time,cpu_time\r\n")

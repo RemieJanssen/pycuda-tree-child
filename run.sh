@@ -1,1 +1,1 @@
-bsub -o output/cluster.out -e output/cluster.err -M 64000M -q bio-gpu-h100 "python ./pycuda_tree_child.py > ./output/test.out"
+bsub -o output/cluster.out -e output/cluster.err -M 128G -q bio-gpu-h100 "python ./pycuda_tree_child.py > ./output/test.out"
