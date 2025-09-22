@@ -61,7 +61,7 @@ def generate_networks(networks_folder, n, max_k, step, iterations):
             start_generating = datetime.datetime.now()
             # network = generate_network_lgt(n,k,0.5,0.5)
             tree = simulate_beta_splitting(n, 1)
-            network = network_from_tree(tree, k, AddEdgeMethod.UNIFORM)
+            network = network_from_tree(tree, k, AddEdgeMethod.BOTTOM)
 
             label_leaves(network)
             # print(network)
@@ -73,12 +73,12 @@ def generate_networks(networks_folder, n, max_k, step, iterations):
 
 
 if __name__ == "__main__":
-    n = 30000
-    max_k = 30000
-    step = 1000
+    n = 3000
+    max_k = 500
+    step = 10
     iterations = 10
     output_folder = "./output/"
-    networks_folder = os.path.join(output_folder, "networks_big")
+    networks_folder = os.path.join(output_folder, "networks")
     output_file = os.path.join(output_folder, "results.csv")
     os.makedirs(networks_folder, exist_ok=True)
     generate_networks(networks_folder, n, max_k, step, iterations)

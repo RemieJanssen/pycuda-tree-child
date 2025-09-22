@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Remie Janssen">
+  <meta name="dcterms.date" content="2005-09-22">
+  <title>PyCuda Tree-Child</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^4/dist/reset.css">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^4/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^4/dist/theme/white.css" id="theme">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">PyCuda Tree-Child</h1>
+  <p class="author">Remie Janssen</p>
+  <p class="date">September 22, 2005</p>
+</section>
+
+<section>
+<section id="background" class="title-slide slide level1">
+<h1>Background</h1>
+
+</section>
+<section id="phylogenetic-network" class="slide level2">
+<h2>Phylogenetic network</h2>
+<div class="columns">
+<div class="column" style="width:&quot;50%;">
+<ul>
+<li>Directed acyclic graph</li>
+<li>Single root (in-0, out-1)</li>
+<li>Labeled leaves (in-1, out-0)</li>
+<li>Tree nodes (in-1, out-2)</li>
+<li>Reticulations (in-2, out-1)</li>
+</ul>
+</div><div class="column" style="width:&quot;50%;">
+<figure>
+<img data-src="images/network.svg" alt="phylogenetic network" /><figcaption aria-hidden="true">phylogenetic network</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section id="tree-child-network" class="slide level2">
+<h2>Tree child network</h2>
+<div class="columns">
+<div class="column" style="width:&quot;50%;">
+<ul>
+<li>Class of networks</li>
+<li>Computationally favorable structure</li>
+<li>“each non-leaf node has at least one tree-node as successor”</li>
+<li>Equivalently: No stacks of reticulations and no W-shapes</li>
+</ul>
+</div><div class="column" style="width:&quot;50%;">
+<figure>
+<img data-src="images/stack_and_w.svg" alt="Stack and W-shape" /><figcaption aria-hidden="true">Stack and W-shape</figcaption>
+</figure>
+</div>
+</div>
+</section></section>
+<section>
+<section id="implementation" class="title-slide slide level1">
+<h1>Implementation</h1>
+
+</section>
+<section id="pycuda" class="slide level2">
+<h2>PyCuda</h2>
+<ul>
+<li>Cuda wrapper for Python</li>
+<li>Still have to write device/global cuda code</li>
+<li>Implicit Memcpy using numpy data formats</li>
+<li>Cuda code in .cu file, loaded in python</li>
+</ul>
+</section>
+<section id="gpu-graph-encoding" class="slide level2">
+<h2>GPU Graph encoding</h2>
+<div class="columns">
+<div class="column" style="width:&quot;50%;">
+<ul>
+<li>Graph: in array</li>
+<li>Nodes: non-negative ints</li>
+<li>in- and out-neighbours per node</li>
+<li>“-1” for non-neighbour (here “-”)</li>
+</ul>
+</div><div class="column" style="width:&quot;50%;">
+<figure>
+<img data-src="images/graph_encoding.svg" alt="Graph encoding" /><figcaption aria-hidden="true">Graph encoding</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section id="gpu-code" class="slide level2">
+<h2>GPU code</h2>
+<ul>
+<li>Each thread checks one node</li>
+<li>Check whether it is a leaf</li>
+<li>Check if it has any tree-node children</li>
+<li>If not as leaf, and no tree-node children, set output to “not tree-child”</li>
+</ul>
+</section></section>
+<section>
+<section id="results" class="title-slide slide level1">
+<h1>Results</h1>
+
+</section>
+<section id="results-1" class="slide level2">
+<h2>Results</h2>
+<div class="columns">
+<div class="column" style="width:&quot;50%;">
+<ul>
+<li>GPU: Fairly constant running time</li>
+<li>CPU: Running time increases with n, and decreases with k</li>
+<li>CPU stops when it finds a stack or W-shape</li>
+<li>As expected: GPU only useful for huge networks with few reticulations</li>
+<li>May be useful for other phylogenetic network problems though</li>
+</ul>
+</div><div class="column" style="width:&quot;50%;">
+<figure>
+<img data-src="images/results.png" alt="Results n=30000, k=0 -&gt; 12000" /><figcaption aria-hidden="true">Results n=30000, k=0 -&gt; 12000</figcaption>
+</figure>
+</div>
+</div>
+</section></section>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/reveal.js@^4/dist/reveal.js"></script>
+
+  // reveal.js plugins
+  <script src="https://unpkg.com/reveal.js@^4/plugin/notes/notes.js"></script>
+  <script src="https://unpkg.com/reveal.js@^4/plugin/search/search.js"></script>
+  <script src="https://unpkg.com/reveal.js@^4/plugin/zoom/zoom.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+        // Push each slide change to the browser history
+        history: true,
+
+        // reveal.js plugins
+        plugins: [
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    </body>
+</html>
