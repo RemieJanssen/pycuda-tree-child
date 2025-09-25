@@ -1,0 +1,9 @@
+name: seaborn
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - python
+  - pip:
+    - seaborn
+    - pandas

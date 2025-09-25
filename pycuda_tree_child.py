@@ -54,14 +54,31 @@ def gpu_is_tree_child(nodes_adjacency_list, max_number_of_neighbours, number_of_
     return result[0] != 1
 
 
-def generate_networks(networks_folder, n, max_k, step, iterations):
-    for k in range(0,max_k+1,step):
+def generate_networks_increasing_k(networks_folder, n, max_k, step, iterations, min_k=0):
+    for k in range(min_k,max_k+1,step):
         for i in range(iterations):
             print(f"generating network with {n} leaves and {k} reticulations")
             start_generating = datetime.datetime.now()
             # network = generate_network_lgt(n,k,0.5,0.5)
             tree = simulate_beta_splitting(n, 1)
-            network = network_from_tree(tree, k, AddEdgeMethod.BOTTOM)
+            network = network_from_tree(tree, k, AddEdgeMethod.UNIFORM)
+
+            label_leaves(network)
+            # print(network)
+            end_generating = datetime.datetime.now()
+            print(f"generating took {end_generating - start_generating}")
+            with open(os.path.join(networks_folder, f"{n}_{k}_{i}"), "w") as f:
+                f.write(network.newick(simple=True))
+            del network
+
+def generate_networks_increasing_n(networks_folder, k, max_n, step, iterations, min_n=0):
+    for n in range(min_n,max_n+1,step):
+        for i in range(iterations):
+            print(f"generating network with {n} leaves and {k} reticulations")
+            start_generating = datetime.datetime.now()
+            # network = generate_network_lgt(n,k,0.5,0.5)
+            tree = simulate_beta_splitting(n, 1)
+            network = network_from_tree(tree, k, AddEdgeMethod.UNIFORM)
 
             label_leaves(network)
             # print(network)
@@ -72,19 +89,34 @@ def generate_networks(networks_folder, n, max_k, step, iterations):
             del network
 
 
+
 if __name__ == "__main__":
     n = 3000
-    max_k = 500
-    step = 10
+    # min_k = 200
+    # max_k = 1000
+    # step = 100
     iterations = 10
     output_folder = "./output/"
-    networks_folder = os.path.join(output_folder, "networks")
-    output_file = os.path.join(output_folder, "results.csv")
+    networks_folder_name = "networks_inc_n"
+    networks_folder = os.path.join(output_folder, networks_folder_name)
+    output_file = os.path.join(output_folder, f"{networks_folder_name}_results.csv")
     os.makedirs(networks_folder, exist_ok=True)
-    generate_networks(networks_folder, n, max_k, step, iterations)
-
+    # generate_networks(networks_folder, n, 190, 10, iterations,min_k=0)
+    # generate_networks(networks_folder, n, 1000, 100, iterations,min_k=500)
+    generate_networks_increasing_n(networks_folder, 100, 3000, 100, iterations,min_n=100)
     with open(output_file, "w+") as f:
         f.write(f"n,k,i,gpu_tc,cpu_tc,gpu_time,cpu_time\r\n")
+
+    # for some reason, the first run of gpu_is_tree_child is slower
+    # hence, we simply run it once before we record times
+    arbitrary_file = os.listdir(networks_folder)[0]
+    with open(os.path.join(networks_folder, arbitrary_file), "r") as f:
+        newick = f.read()
+    network = DiNetwork.from_newick(newick)
+    nodes_adjacency_list = network_to_adjacency_list(network, max_degree=2)
+    number_of_nodes = len(network.nodes)
+    gpu_is_tc = gpu_is_tree_child(nodes_adjacency_list, 2, number_of_nodes)
+    # done with arbitrary execution
 
     for network_file in os.listdir(networks_folder):
         with open(os.path.join(networks_folder, network_file), "r") as f:

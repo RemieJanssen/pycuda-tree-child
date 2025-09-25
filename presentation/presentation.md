@@ -1,6 +1,6 @@
 % PyCuda Tree-Child
 % Remie Janssen
-% September 22, 2005
+% September 22, 2025
 
 # Background
 
@@ -74,7 +74,23 @@
 - If not as leaf, and no tree-node children, set output to "not tree-child"
 
 
-# Results
+# Experiments
+
+## Setup
+::: {.columns}
+:::: {.column width="50%}
+
+- Create random tree with *n* leaves
+- Add *k* reticulation edges
+- *10* iterations per *(n,k)*
+
+::::
+:::: {.column width="50%}
+
+![Network generation](images/generate.svg)
+
+::::
+:::
 
 ## Results
 ::: {.columns}
@@ -83,13 +99,25 @@
 - GPU: Fairly constant running time
 - CPU: Running time increases with n, and decreases with k
 - CPU stops when it finds a stack or W-shape
-- As expected: GPU only useful for huge networks with few reticulations
-- May be useful for other phylogenetic network problems though
 
 ::::
 :::: {.column width="50%}
+::::: {.r-stack}
+:::::: {.fragment .current-visible fragment-index=0}
 
-![Results n=30000, k=0 -> 12000](images/results.png)
+![Results n=100 -> 3000, k=1000](images/results_inc_n.png)
 
+::::::
+:::::: {.fragment .current-visible fragment-index=1}
+
+![Results n=3000, k=0 -> 1000](images/results.png)
+
+::::::
+:::::
 ::::
 :::
+
+## Discussion
+
+- As expected: GPU only useful for huge networks with few reticulations
+- May be useful for other phylogenetic network problems

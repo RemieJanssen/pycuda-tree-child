@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
   <meta name="author" content="Remie Janssen">
-  <meta name="dcterms.date" content="2005-09-22">
+  <meta name="dcterms.date" content="2025-09-22">
   <title>PyCuda Tree-Child</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -29,7 +29,7 @@
 <section id="title-slide">
   <h1 class="title">PyCuda Tree-Child</h1>
   <p class="author">Remie Janssen</p>
-  <p class="date">September 22, 2005</p>
+  <p class="date">September 22, 2025</p>
 </section>
 
 <section>
@@ -113,11 +113,27 @@
 </ul>
 </section></section>
 <section>
-<section id="results" class="title-slide slide level1">
-<h1>Results</h1>
+<section id="experiments" class="title-slide slide level1">
+<h1>Experiments</h1>
 
 </section>
-<section id="results-1" class="slide level2">
+<section id="setup" class="slide level2">
+<h2>Setup</h2>
+<div class="columns">
+<div class="column" style="width:&quot;50%;">
+<ul>
+<li>Create random tree with <em>n</em> leaves</li>
+<li>Add <em>k</em> reticulation edges</li>
+<li><em>10</em> iterations per <em>(n,k)</em></li>
+</ul>
+</div><div class="column" style="width:&quot;50%;">
+<figure>
+<img data-src="images/generate.svg" alt="Network generation" /><figcaption aria-hidden="true">Network generation</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section id="results" class="slide level2">
 <h2>Results</h2>
 <div class="columns">
 <div class="column" style="width:&quot;50%;">
@@ -125,15 +141,29 @@
 <li>GPU: Fairly constant running time</li>
 <li>CPU: Running time increases with n, and decreases with k</li>
 <li>CPU stops when it finds a stack or W-shape</li>
-<li>As expected: GPU only useful for huge networks with few reticulations</li>
-<li>May be useful for other phylogenetic network problems though</li>
 </ul>
 </div><div class="column" style="width:&quot;50%;">
+<div class="r-stack">
+<div class="fragment current-visible" data-fragment-index="0">
 <figure>
-<img data-src="images/results.png" alt="Results n=30000, k=0 -&gt; 12000" /><figcaption aria-hidden="true">Results n=30000, k=0 -&gt; 12000</figcaption>
+<img data-src="images/results_inc_n.png" alt="Results n=100 -&gt; 3000, k=1000" /><figcaption aria-hidden="true">Results n=100 -&gt; 3000, k=1000</figcaption>
+</figure>
+</div>
+<div class="fragment current-visible" data-fragment-index="1">
+<figure>
+<img data-src="images/results.png" alt="Results n=3000, k=0 -&gt; 1000" /><figcaption aria-hidden="true">Results n=3000, k=0 -&gt; 1000</figcaption>
 </figure>
 </div>
 </div>
+</div>
+</div>
+</section>
+<section id="discussion" class="slide level2">
+<h2>Discussion</h2>
+<ul>
+<li>As expected: GPU only useful for huge networks with few reticulations</li>
+<li>May be useful for other phylogenetic network problems</li>
+</ul>
 </section></section>
     </div>
   </div>
